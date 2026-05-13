@@ -39,24 +39,27 @@ def random_position(size):
 
 #Hàm hành động đối ngược
 def opposite_action(action):
-    opposites = {'U': 'D', 'D': 'U', 'L': 'R', 'R': 'L'}
+    opposites = {'U': 'D', 
+                 'D': 'U', 
+                 'L': 'R', 
+                 'R': 'L'}
     return opposites.get(action, None)
 
 def vacuum(grid, x, y, last_action):
     #Nếu đang đứng ở vị trí dơ thì hút bụi
-    if grid[x][y] == 1:
-        print(f"Robot hút bụi tại: ({x}, {y})")
+    state = grid[x][y]
+    if state == 1:
+        print("Robot hút bụi tại:", (x, y))
         grid[x][y] = 0
 
     #Cập nhật
-    possible_moves = P_moves(x, y)
+    moves = P_moves(x, y)
     
     #Loại bỏ hành động trc đó
     forbidden_move = opposite_action(last_action)
-    filtered_moves = [m for m in possible_moves if m != forbidden_move]
+    filtered_moves = [m for m in moves if m != forbidden_move]
     
     #Ưu tiên chọn ô bẩn trong các ô có thể đi
-    dirty_moves = []
     for dir in filtered_moves:
         nx, ny = move(x, y, dir)
         nextstate = grid[nx][ny]
@@ -64,7 +67,6 @@ def vacuum(grid, x, y, last_action):
         # Nếu nextstate dơ thì đi tới đó
         if nextstate == 1:
             action = dir
-            found = True
             break
         else:
             action = random.choice(filtered_moves)
@@ -82,10 +84,10 @@ def model_vacuum(grid, x, y, result_grid):
             output(grid)
             return True
         
-        print(f"step", i+1)
+        print("Step", i+1)
         output(grid)
         x, y, last_action = vacuum(grid, x, y, last_action)
-        print(f"Vị trí hiện tại: ({x}, {y})")
+        print("Vị trí hiện tại:", x, y)
         print()
         
     print("false")
