@@ -11,7 +11,6 @@ def P_moves(x, y):
 
 # Hàm di chuyển
 k = {'D': (1, 0), 'U': (-1, 0), 'R': (0, 1), 'L': (0, -1)}
-
 def move(x, y, dir):
     return x + k[dir][0], y + k[dir][1]
 
@@ -39,17 +38,15 @@ def random_position(size):
     return x, y
 
 def vacuum(grid, x, y):
-
     # Nếu đang đứng ở vị trí dơ thì hút bụi
     state = grid[x][y]
-
     if state == 1:
         print("Robot hút bụi tại:", (x, y))
         grid[x][y] = 0
 
     # Các hướng có thể đi
     moves = P_moves(x, y)
-
+    
     found = False
     for dir in moves:
         nx, ny = move(x, y, dir)
@@ -58,12 +55,9 @@ def vacuum(grid, x, y):
         # Nếu nextstate dơ thì đi tới đó
         if nextstate == 1:
             action = dir
-            found = True
             break
-
-    # Nếu không dơ thì random
-    if found == False:
-        action = random.choice(moves)
+        else:  
+            action = random.choice(moves)
     
     print("Robot di chuyển:", action)
 
@@ -72,6 +66,22 @@ def vacuum(grid, x, y):
 
     # Trả về vị trí mới
     return x, y
+
+
+
+def simple_vacuum(grid, x, y, result_grid):
+    #Vì grid có 16 ô nên tối đa robot sẽ đi 16 bước
+    for i in range(16):
+        if grid == result_grid:
+            print("done")
+            break
+        else:
+            print("Step", i+1)
+            output(grid)
+            x, y = vacuum(grid, x, y)
+            print("Vị trí hiện tại:", x, y)
+            print()
+    print("false")
 
 # Ma trận
 grid = random_grid(4)
@@ -90,13 +100,4 @@ result_grid = [
 
 print("Vị trí đầu tiên:", x, y)
 print()
-
-
-for i in range(10):
-    if grid == result_grid:
-        print("done")
-        break
-    else:
-        output(grid)
-        x, y = vacuum(grid, x, y)
-        print("Vị trí hiện tại:", x, y)
+simple_vacuum(grid, x, y, result_grid)
