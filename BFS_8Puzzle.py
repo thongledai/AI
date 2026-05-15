@@ -94,7 +94,7 @@ def BFS(star):
 
         state_parent = tuple(map(tuple, node.state))
         explored.add(state_parent)
-        frontier_set.remove(state_parent)
+        frontier_set.discard(state_parent)
 
         # Random các action
         actions = random.sample(get_actions(node.state), len(get_actions(node.state)))
