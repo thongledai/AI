@@ -1,6 +1,5 @@
 import random
 from collections import deque
-from ModelBased_Puzzle import *
 from Support_Functions.SupportFunctions import check_goal
 from Support_Functions.Node import Node
 from Support_Functions.CheckSolve import check_solve
@@ -9,11 +8,11 @@ from Support_Functions.SupportFunctions import *
 # Depth First Search
 def DFS(start):
     if not check_solve(start):
-        return "failure"
+        return "failure", "N/A"
     node = Node(state=start)
 
     if check_goal(node.state):
-        return solution(node)
+        return solution(node), node.path_cost
     
     # frontier dùng LIFO
     frontier = deque([node])
@@ -44,9 +43,11 @@ def DFS(start):
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:               
                 if check_goal(child.state):
-                    return solution(child)
+                    return solution(child), child.path_cost
+                elif child.path_cost < 40: # giới hạn độ sâu tối đa là 40
+                    return "failure", "N/A"
                 else:
                     frontier.append(child)
                     frontier_set.add(state_child)
 
-    return "failure"
+    return "failure", "N/A"

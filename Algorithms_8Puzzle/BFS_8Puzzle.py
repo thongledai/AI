@@ -1,19 +1,18 @@
 import random
 from collections import deque
-from ModelBased_Puzzle import *
 from Support_Functions.SupportFunctions import *
 from Support_Functions.CheckSolve import check_solve
 from Support_Functions.Node import Node
-from Support_Functions.CalculateCostUSC import cal_cost
+
 
 # Bread First Search
 def BFS(start):
     if not check_solve(start):
-        return "failure"
+        return "failure", "N/A"
     node = Node(state=start)
 
     if check_goal(node.state):
-        return solution(node)
+        return solution(node), node.path_cost
     
     # frontier dùng FIFO
     frontier = deque([node])
@@ -44,9 +43,9 @@ def BFS(start):
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:               
                 if check_goal(child.state):
-                    return solution(child)
+                    return solution(child), child.path_cost
                 else:
                     frontier.append(child)
                     frontier_set.add(state_child)
 
-    return "failure"
+    return "failure", "N/A"

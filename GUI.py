@@ -1,131 +1,233 @@
-# Tạo GUI
-from tkinter import *
+import tkinter as tk
+from tkinter import ttk, messagebox
+from Support_Functions.SupportFunctions import random_start, child_state
 
-window = Tk()
-window.title("UCS - 8 Puzzle")
-window.geometry('1000x600+250+150') 
+class PuzzleGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("8-Puzzle Solver")
+        self.root.geometry('950x600+450+200')
+        self.root.configure(bg='#f4f4f4')
 
-# Trạng thái của GUI
-current_states_list = []  # Lưu danh sách ma trận
-current_index = 0         # Vị trí bước hiện tại
+        # danh sách các trạng thái ma trận
+        self.current_states_list = []
+        self.current_index = 0
+        self.path_actions = []
 
-# Khung ma trận
-grid_frame = Frame(window, bg='gray', bd=5)
-grid_frame.place(x=350, y=50, width=300, height=300)
+        self.setup_styles()
+        self.create_widgets()
+        self.handle_reset()
 
-# Mảng 2 chiều chứa các Label
-labels_matrix = [[None for _ in range(3)] for _ in range(3)]
+    def setup_styles(self):
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        self.style.configure('TCombobox', fieldbackground='white', background='#e0e0e0', font=('Arial', 12))
 
-for i in range(3):
-    for j in range(3):
-        lbl = Label(grid_frame, text="", font=('Arial', 24, 'bold'), 
-                    bg='white', fg='black', bd=2, relief="solid")
-        lbl.grid(row=i, column=j, padx=5, pady=5, sticky="nsew")
-        labels_matrix[i][j] = lbl
-
-# Các ô trong grid đều nhau
-for i in range(3):
-    grid_frame.rowconfigure(i, weight=1)
-    grid_frame.columnconfigure(i, weight=1)
-
-# Hàm cập nhật ma trận
-def update_gui_matrix(state):
-    for i in range(3):
-        for j in range(3):
-            val = state[i][j]
-            if val == 0:
-                labels_matrix[i][j].config(text="", bg='lightgray') # Ô trống
-            else:
-                labels_matrix[i][j].config(text=str(val), bg='white')
-
-# Random
-def handle_random():
-    global current_states_list, current_index
-    
-    A = random_start()
-
-    # Hiện state ngay lập tức
-    update_gui_matrix(A)
-
-    # Hiện Searching...
-    entry_path.config(state=NORMAL)
-    entry_path.delete(0, END)
-    entry_path.insert(0, "Searching...")
-    entry_path.config(state=DISABLED)
-
-    # Ép GUI cập nhật ngay
-    window.update()
-
-    # Bắt đầu tìm path
-    path = UCS(A)
-    
-    # Xóa dữ liệu cũ
-    entry_path.config(state=NORMAL)
-    entry_path.delete(0, END)
-    
-    if path == "failure":
-        entry_path.insert(0, "Failure")
-        entry_path.config(state=DISABLED)
-
-        current_states_list = [A]
-        current_index = 0
-        return
+    # chọn thuật toán
+    def create_widgets(self):
         
-    else:
-        # Hiện path cuối cùng
-        path_str = " ".join(path)
+        top_frame = tk.Frame(self.root, bg='#f4f4f4')
+        top_frame.pack(side=tk.TOP, fill=tk.X, padx=40, pady=20)
 
-        entry_path.insert(0, path_str)
-        entry_path.config(state=DISABLED)
+        lbl_algo = tk.Label(top_frame, text="Chọn thuật toán:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
+        lbl_algo.pack(side=tk.LEFT, padx=5)
 
-        # Danh sách state ở PATH
-        current_states_list = [A]
+        self.algo_box = ttk.Combobox(top_frame, values=["Bread First Search", "Depth First Search", "Iterative Deepening Search", "Uniform Cost Search"], state="readonly", width=22)
+        self.algo_box.current(0)
+        self.algo_box.pack(side=tk.LEFT, padx=10)
 
-        temp_state = A
+        # hiển thị ma trận
+        matrix_container = tk.Frame(self.root, bg='#7f8c8d', bd=4, relief="ridge")
+        matrix_container.place(x=150, y=100, width=360, height=360)
 
+        self.matrix_entries = [[None for _ in range(3)] for _ in range(3)]
+        for i in range(3):
+            for j in range(3):
+                entry = tk.Entry(matrix_container, font=('Arial', 28, 'bold'), justify='center',
+                                 bg='white', fg='#2c3e50', bd=1, relief="solid")
+                entry.grid(row=i, column=j, padx=4, pady=4, sticky="nsew")
+                matrix_container.rowconfigure(i, weight=1)
+                matrix_container.columnconfigure(j, weight=1)
+                self.matrix_entries[i][j] = entry
+
+        # bảng điều khiển
+        btn_frame = tk.Frame(self.root, bg='#e0e0e0', bd=2, relief="groove")
+        btn_frame.place(x=620, y=100, width=220, height=360)
+
+        lbl_control = tk.Label(btn_frame, text="BẢNG ĐIỀU KHIỂN", font=('Arial', 11, 'bold'), bg='#e0e0e0', fg='#555555')
+        lbl_control.pack(fill=tk.X, pady=10)
+
+        buttons_config = [
+            ("Random", self.handle_random),
+            ("Execute", self.handle_execute),
+            ("Next Step", self.handle_next),
+            ("Last Step", self.handle_last),
+            ("Reset", self.handle_reset)
+        ]
+
+        for text, command in buttons_config:
+            bg_color = '#bdc3c7' 
+            fg_color = 'black'
+            
+            btn = tk.Button(btn_frame, text=text, font=('Arial', 12, 'bold'), bg=bg_color, fg=fg_color,
+                            activebackground='#95a5a6', relief="raised", bd=2, command=command)
+            btn.pack(fill=tk.X, padx=15, pady=8, ipady=4)
+
+        # path, cost
+        info_frame = tk.Frame(self.root, bg='#f4f4f4')
+        info_frame.place(x=50, y=490, width=900, height=120)
+
+        lbl_path = tk.Label(info_frame, text="Path:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
+        lbl_path.grid(row=0, column=0, sticky=tk.W, pady=5)
+        
+        self.entry_path = tk.Entry(info_frame, font=('Arial', 12), bg='white', fg='black', bd=2, relief="sunken")
+        self.entry_path.grid(row=0, column=1, sticky="ew", padx=10, pady=5)
+        self.entry_path.config(state=tk.DISABLED)
+
+        lbl_cost = tk.Label(info_frame, text="Cost:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
+        lbl_cost.grid(row=1, column=0, sticky=tk.W, pady=5)
+
+        self.entry_cost = tk.Entry(info_frame, font=('Arial', 12, 'bold'), bg='white', fg='#c0392b', bd=2, relief="sunken", width=15)
+        self.entry_cost.grid(row=1, column=1, sticky=tk.W, padx=10, pady=5)
+        self.entry_cost.config(state=tk.DISABLED)
+
+        info_frame.columnconfigure(1, weight=1)
+
+    # đọc xuất ma trận
+    # tự nhập
+    def get_state_from_gui(self):
+        
+        state = []
+        for i in range(3):
+            row = []
+            for j in range(3):
+                val = self.matrix_entries[i][j].get().strip()
+                if val == "" or val == "0":
+                    row.append(0)
+                else:
+                    try:
+                        row.append(int(val))
+                    except ValueError:
+                        return None
+            state.append(row)
+        return state
+
+    def update_gui_matrix(self, state):
+        for i in range(3):
+            for j in range(3):
+                val = state[i][j]
+                self.matrix_entries[i][j].config(state=tk.NORMAL)
+                self.matrix_entries[i][j].delete(0, tk.END)
+                if val == 0:
+                    self.matrix_entries[i][j].insert(0, "")
+                    self.matrix_entries[i][j].config(bg='#e0e0e0')
+                else:
+                    self.matrix_entries[i][j].insert(0, str(val))
+                    self.matrix_entries[i][j].config(bg='white')
+
+    def update_info_fields(self, path_text, cost_text):
+        for entry, text in [(self.entry_path, path_text), (self.entry_cost, cost_text)]:
+            entry.config(state=tk.NORMAL)
+            entry.delete(0, tk.END)
+            entry.insert(0, text)
+            entry.config(state=tk.DISABLED)
+
+    def validate_matrix(self, state):
+        if not state: return False
+        flat_list = [cell for row in state for cell in row]
+        return sorted(flat_list) == list(range(9))
+
+    # xử lý nút
+    def handle_random(self): # tạo ma trận random
+        random_state = random_start()
+        self.current_states_list = [random_state]
+        self.current_index = 0
+        self.path_actions = []
+        self.update_gui_matrix(random_state)
+        self.update_info_fields("", "")
+
+    def handle_execute(self):
+        current_input = self.get_state_from_gui()
+        
+        if not self.validate_matrix(current_input):
+            messagebox.showerror("Ma trận không hợp lệ!", "Vui lòng nhập đủ các số từ 1-8 và 1 ô trống.")
+            return
+
+        algo = self.algo_box.get()
+        self.update_info_fields("Searching...", "Calculating...")
+        self.root.update()
+
+        try:
+            if algo == "Bread First Search":
+                from Algorithms_8Puzzle.BFS_8Puzzle import BFS
+                result = BFS(current_input)
+            elif algo == "Depth First Search":
+                from Algorithms_8Puzzle.DFS_8Puzzle import DFS
+                result = DFS(current_input)
+            elif algo == "Iterative Deepening Search":
+                from Algorithms_8Puzzle.IDF_8Puzzle import IDS
+                result = IDS(current_input)
+            elif algo == "Uniform Cost Search":
+                from Algorithms_8Puzzle.UCS_8Puzzle import UCS
+                result = UCS(current_input)
+        except Exception as e:
+            messagebox.showerror("Lỗi Cấu Trúc File", f"Không thể chạy thuật toán vì file [{algo}_8Puzzle.py] lỗi hệ thống:\n\n{str(e)}")
+            self.update_info_fields("Error in Backend File", "N/A")
+            return
+
+        # Xử lý kết quả trả về
+        if result == "failure" or result is None or (isinstance(result, tuple) and result[0] == "failure"):
+            self.update_info_fields("Failure", "N/A")
+            self.current_states_list = [current_input]
+            self.current_index = 0
+            self.path_actions = []
+            return
+
+        if isinstance(result, tuple) and len(result) >= 2:
+            path, cost = result[0], result[1]
+
+        # Lưu danh sách hành động
+        self.path_actions = path
+        self.current_states_list = [current_input]
+        
+        # Dựng chuỗi ma trận di chuyển qua từng bước
+        temp_state = current_input
         for action in path:
             temp_state = child_state(temp_state, action)
-            current_states_list.append(temp_state)
-            
-        # Cập nhật ma trận
-        current_index = 0
-        update_gui_matrix(current_states_list[current_index])
+            self.current_states_list.append(temp_state)
 
-# Next Step
-def handle_next():
-    global current_index
-    if not current_states_list:
-        return
-    if current_index < len(current_states_list) - 1:
-        current_index += 1
-        update_gui_matrix(current_states_list[current_index])
+        self.current_index = 0
+        self.update_gui_matrix(self.current_states_list[self.current_index])
+        
+        # In chuỗi hành động ra ô Path và hiển thị Cost thực tế
+        path_str = " - ".join(path) if path else "Goal!"
+        self.update_info_fields(path_str, str(cost))
 
-# Last Step
-def handle_last():
-    global current_index
-    if not current_states_list:
-        return
-    if current_index > 0:
-        current_index -= 1
-        update_gui_matrix(current_states_list[current_index])
+    def handle_next(self):
+        if not self.current_states_list: return
+        if self.current_index < len(self.current_states_list) - 1:
+            self.current_index += 1
+            self.update_gui_matrix(self.current_states_list[self.current_index])
+            if self.path_actions:
+                path_str = " - ".join(self.path_actions)
+                self.update_info_fields(path_str, f"Bước {self.current_index} / {len(self.path_actions)}")
 
-# UI
-btn_rd = Button(window, text="Random", bg='lightgray', fg='black',     
-                font=('Arial', 20), command=handle_random)
-btn_rd.place(x=250, y=520)
+    def handle_last(self):
+        if not self.current_states_list: return
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.update_gui_matrix(self.current_states_list[self.current_index])
+            if self.path_actions:
+                path_str = " - ".join(self.path_actions)
+                self.update_info_fields(path_str, f"Bước {self.current_index} / {len(self.path_actions)}")
 
-btn_last = Button(window, text="Last Step", bg='lightgray', fg='black',     
-                 font=('Arial', 20), command=handle_last)
-btn_last.place(x=441, y=520)
-
-btn_next = Button(window, text="Next Step", bg='lightgray', fg='black',     
-                 font=('Arial', 20), command=handle_next)
-btn_next.place(x=645, y=520)
-
-lb_path = Label(window, text="Path:", font=('Arial', 20))
-lb_path.place(x=30, y=450)
-
-entry_path = Entry(window, width=58, font=('Arial', 20))
-entry_path.place(x=100, y=450)
-
-window.mainloop()
+    def handle_reset(self):
+        self.current_states_list = []
+        self.current_index = 0
+        self.path_actions = []
+        for i in range(3):
+            for j in range(3):
+                self.matrix_entries[i][j].config(state=tk.NORMAL)
+                self.matrix_entries[i][j].delete(0, tk.END)
+                self.matrix_entries[i][j].config(bg='white')
+        self.update_info_fields("", "")

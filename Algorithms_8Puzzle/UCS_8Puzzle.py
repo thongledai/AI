@@ -1,18 +1,18 @@
 import heapq
 from Support_Functions.CheckSolve import check_solve
-from Support_Functions.Node import Node
+from Support_Functions.Node import *
 from Support_Functions.SupportFunctions import *
 from Support_Functions.CalculateCostUSC import cal_cost
 
 # Uniform Cost Search 
 def UCS(start):
     if not check_solve(start):
-        return "failure"
+        return "failure", "N/A"
     
     node = Node(state=start)
     
     if check_goal(node.state):
-        return solution(node)
+        return solution(node), node.path_cost
     
     # frontier dùng hàng đợi ưu tiên
     frontier = []
@@ -24,7 +24,7 @@ def UCS(start):
     while frontier:
         node = heapq.heappop(frontier)[1]
         if check_goal(node.state):
-            return solution(node)
+            return solution(node), node.path_cost
     
         state_parent = tuple(map(tuple, node.state))
         explored.add(state_parent)
@@ -45,6 +45,6 @@ def UCS(start):
             if not in_explored and not in_frontier:               
                 heapq.heappush(frontier, (child.path_cost, child))
 
-    return "failure"
+    return "failure", "N/A"
 
 

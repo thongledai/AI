@@ -1,7 +1,4 @@
 import random
-from tracemalloc import start
-
-start()
 
 # Lấy vị trí ô trống
 def get_empty(state):
