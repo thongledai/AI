@@ -1,153 +1,8 @@
-import random
-from collections import deque
-
-class Node:
-    def __init__(self, state, parent=None, action=None, depth=0):
-        self.state = state  # Ma trận 3x3
-        self.parent = parent
-        self.action = action
-        self.depth = depth
-
-    def show_state(self):
-        for row in self.state:
-            print(row)
-        print()
-
-    def __eq__(self, other):
-        return self.state == other.state
-
-def get_empty(state):
-    for i in range(3):
-        for j in range(3):
-            if state[i][j] == 0:
-                return i, j
-
-def get_actions(state):
-    x, y = get_empty(state)
-    actions = []
-    if x < 2: actions.append('D')
-    if y < 2: actions.append('R')
-    if x > 0: actions.append('U')
-    if y > 0: actions.append('L')
-    return actions
-
-mapping = { 'D': (1, 0), 
-            'U': (-1, 0), 
-            'R': (0, 1), 
-            'L': (0, -1)}
-
-# Hàm tạo state con
-def child_state(state, action):
-    # Sao chép ma trận
-    new_state = [row[:] for row in state]
-    x, y = get_empty(state)
-    
-    dx, dy = mapping[action]
-    new_x, new_y = x + dx, y + dy
-    
-    # Hoán đổi vị trí
-    new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
-    return new_state
-
-def childs(node):
-    childs = []
-    for action in get_actions(node.state):
-        child = Node(state=child_state(node.state, action), 
-                     parent=node, 
-                     action=action, 
-                     depth=node.depth + 1)
-        childs.append(child)
-    return childs
-
-goal = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 0]
-]
-
-
-def goal_test(state):
-    return state == goal
-
-# Lấy đường đi từ star đến goal
-def solution(node):
-    path = []
-    n = node
-    while n.parent:
-        path.append(n.action)
-        n = n.parent
-    return path[::-1]
-
-
-# Iterative Deepening Search
-def IDS(start):
-    for depth in range(100): 
-        result = DLS(start, depth)
-        if result != "cutoff":
-            return result
-    return "failure"
-         
-
-def DLS(start, limit):
-    node = Node(state=start)
-
-    frontier = deque([node])
-    frontier_set = set() # Lưu note.state tìm kiếm cho nhanh
-    frontier_set.add(tuple(map(tuple, node.state))) 
-    explored = set() # Lưu note.state đã xét
-
-    result = "failure"
-    while frontier:
-        node = frontier.pop()
-        state_parent = tuple(map(tuple, node.state))
-        frontier_set.discard(state_parent)
-
-        if goal_test(node.state):
-            return solution(node)
-
-        explored.add(state_parent)
-
-        if node.depth >= limit:
-            result = "cutoff"
-        else:
-            for child in childs(node):
-                state_child = tuple(map(tuple, child.state))
-                if state_child not in explored and state_child not in frontier_set:
-                    frontier.append(child)
-                    frontier_set.add(state_child)
-
-    return result
-       
-# In mảng
-def output(a):
-    for row in a:
-        print(*(row))
-    print()
-
-# Tạo mảng random
-def random_start():
-    nums = list(range(9))
-    random.shuffle(nums)
-    return [nums[0:3], nums[3:6], nums[6:9]]
-
-# State bắt đầu
-#start = random_start()
-start = [
-    [0, 1, 3],
-    [4, 2, 6],
-    [7, 5, 8]
-]
-# output(start)
-
-# res = IDS(start)
-# print("Path:", res)
-
-
 # Tạo GUI
 from tkinter import *
 
 window = Tk()
-window.title("IDS - 8 Puzzle")
+window.title("UCS - 8 Puzzle")
 window.geometry('1000x600+250+150') 
 
 # Trạng thái của GUI
@@ -202,7 +57,7 @@ def handle_random():
     window.update()
 
     # Bắt đầu tìm path
-    path = IDS(A)
+    path = UCS(A)
     
     # Xóa dữ liệu cũ
     entry_path.config(state=NORMAL)
@@ -235,6 +90,7 @@ def handle_random():
         # Cập nhật ma trận
         current_index = 0
         update_gui_matrix(current_states_list[current_index])
+
 # Next Step
 def handle_next():
     global current_index
