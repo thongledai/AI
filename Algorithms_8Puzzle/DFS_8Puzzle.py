@@ -6,22 +6,20 @@ from Support_Functions.CheckSolve import check_solve
 from Support_Functions.SupportFunctions import *
 
 # Depth First Search
-def DFS(start):
+# giới hạn độ sâu tối đa là 50
+def DFS(start, goal):
     if not check_solve(start):
         return "failure", "N/A"
+    
     node = Node(state=start)
-
-    if check_goal(node.state):
+    if check_goal(node.state, goal):
         return solution(node), node.path_cost
     
     # frontier dùng LIFO
     frontier = deque([node])
-
     # các node.state cần xét
     frontier_set=set()
     frontier_set.add(tuple(map(tuple, node.state)))
-
-    
     # các node.state đã xét
     explored = set()
     
@@ -32,19 +30,19 @@ def DFS(start):
         explored.add(state_parent)
         frontier_set.discard(state_parent)
 
-        # Random các action
-        actions = random.sample(get_actions(node.state), len(get_actions(node.state)))
-        #actions = get_actions(node.state)
+        # các action
+        actions = get_actions(node.state)
         for action in actions:
             child = Node(state=child_state(node.state, action), 
                          parent=node, 
                          action=action, 
                          path_cost=node.path_cost + 1)
+            
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:               
-                if check_goal(child.state):
+                if check_goal(child.state, goal):
                     return solution(child), child.path_cost
-                elif child.path_cost < 40: # giới hạn độ sâu tối đa là 40
+                elif child.path_cost >= 50: # giới hạn độ sâu tối đa là 40
                     return "failure", "N/A"
                 else:
                     frontier.append(child)

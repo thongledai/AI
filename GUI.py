@@ -1,12 +1,17 @@
 import tkinter as tk
+import copy 
 from tkinter import ttk, messagebox
-from Support_Functions.SupportFunctions import random_start, child_state
+from Support_Functions.SupportFunctions import *
+from Algorithms_8Puzzle.BFS_8Puzzle import BFS
+from Algorithms_8Puzzle.DFS_8Puzzle import DFS
+from Algorithms_8Puzzle.IDF_8Puzzle import IDS
+from Algorithms_8Puzzle.UCS_8Puzzle import UCS
 
 class PuzzleGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("8-Puzzle Solver")
-        self.root.geometry('950x600+450+200')
+        self.root.geometry('950x600+250+200')
         self.root.configure(bg='#f4f4f4')
 
         # danh sách các trạng thái ma trận
@@ -87,7 +92,7 @@ class PuzzleGUI:
         lbl_cost = tk.Label(info_frame, text="Cost:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
         lbl_cost.grid(row=1, column=0, sticky=tk.W, pady=5)
 
-        self.entry_cost = tk.Entry(info_frame, font=('Arial', 12, 'bold'), bg='white', fg='#c0392b', bd=2, relief="sunken", width=15)
+        self.entry_cost = tk.Entry(info_frame, font=('Arial', 12), bg='white', fg='#c0392b', bd=2, relief="sunken", width=15)
         self.entry_cost.grid(row=1, column=1, sticky=tk.W, padx=10, pady=5)
         self.entry_cost.config(state=tk.DISABLED)
 
@@ -159,39 +164,47 @@ class PuzzleGUI:
 
         try:
             if algo == "Bread First Search":
-                from Algorithms_8Puzzle.BFS_8Puzzle import BFS
-                result = BFS(current_input)
+                result = BFS(current_input, goal)
             elif algo == "Depth First Search":
-                from Algorithms_8Puzzle.DFS_8Puzzle import DFS
-                result = DFS(current_input)
+                result = DFS(current_input, goal)
             elif algo == "Iterative Deepening Search":
-                from Algorithms_8Puzzle.IDF_8Puzzle import IDS
-                result = IDS(current_input)
+                result = IDS(current_input, goal)
             elif algo == "Uniform Cost Search":
-                from Algorithms_8Puzzle.UCS_8Puzzle import UCS
-                result = UCS(current_input)
+                result = UCS(current_input, goal)
         except Exception as e:
-            messagebox.showerror("Lỗi Cấu Trúc File", f"Không thể chạy thuật toán vì file [{algo}_8Puzzle.py] lỗi hệ thống:\n\n{str(e)}")
-            self.update_info_fields("Error in Backend File", "N/A")
+            messagebox.showerror(
+                "Lỗi Cấu Trúc File",
+                f"Không thể chạy thuật toán:\n\n{type(e).__name__}: {str(e)}"
+            )
+            self.update_info_fields("Error", "N/A")
+            print(type(e).__name__, ":", e)
             return
+
 
         # Xử lý kết quả trả về
-        if result == "failure" or result is None or (isinstance(result, tuple) and result[0] == "failure"):
+        if result is None:
             self.update_info_fields("Failure", "N/A")
-            self.current_states_list = [current_input]
-            self.current_index = 0
-            self.path_actions = []
             return
 
-        if isinstance(result, tuple) and len(result) >= 2:
-            path, cost = result[0], result[1]
+        if isinstance(result, tuple):
+            path, cost = result
+
+            if path == "failure":
+                self.update_info_fields("Failure", "N/A")
+                self.current_states_list = [current_input]
+                self.current_index = 0
+                self.path_actions = []
+                return
+        else:
+            self.update_info_fields("Failure", "N/A")
+            return
 
         # Lưu danh sách hành động
         self.path_actions = path
         self.current_states_list = [current_input]
         
         # Dựng chuỗi ma trận di chuyển qua từng bước
-        temp_state = current_input
+        temp_state = copy.deepcopy(current_input)
         for action in path:
             temp_state = child_state(temp_state, action)
             self.current_states_list.append(temp_state)
@@ -210,7 +223,7 @@ class PuzzleGUI:
             self.update_gui_matrix(self.current_states_list[self.current_index])
             if self.path_actions:
                 path_str = " - ".join(self.path_actions)
-                self.update_info_fields(path_str, f"Bước {self.current_index} / {len(self.path_actions)}")
+                self.update_info_fields(path_str, f" {self.current_index} / {len(self.path_actions)}")
 
     def handle_last(self):
         if not self.current_states_list: return

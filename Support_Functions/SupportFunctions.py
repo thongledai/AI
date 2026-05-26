@@ -59,13 +59,11 @@ def random_start():
     random.shuffle(nums)
     return [nums[0:3], nums[3:6], nums[6:9]]
 
-start = random_start()
-
 goal = [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 0]
 ]
 
-def check_goal(state):
+def check_goal(state, goal):
     return state == goal

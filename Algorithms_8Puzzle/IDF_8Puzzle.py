@@ -6,18 +6,19 @@ from Support_Functions.SupportFunctions import *
 
 
 # Iterative Deepening Search
-def IDS(start):
+def IDS(start, goal):
     if not check_solve(start):
         return "failure", "N/A"
     
     for depth in range(40): 
-        result = DLS(start, depth)
+        result = DLS(start, goal, depth)
         if result != "cutoff" and result != "failure":
             return result
+        
     return "failure", "N/A"
          
 
-def DLS(start, limit):
+def DLS(start, goal, limit):
     node = Node(state=start)
 
     frontier = deque([node])
@@ -28,12 +29,11 @@ def DLS(start, limit):
     result = "failure"
     while frontier:
         node = frontier.pop()
-        state_parent = tuple(map(tuple, node.state))
-        frontier_set.discard(state_parent)
-
-        if check_goal(node.state):
+        if check_goal(node.state, goal):
             return solution(node), node.path_cost
 
+        state_parent = tuple(map(tuple, node.state))
+        frontier_set.discard(state_parent)
         explored.add(state_parent)
 
         if node.path_cost >= limit:
@@ -45,6 +45,7 @@ def DLS(start, limit):
                              parent=node, 
                              action=action, 
                              path_cost=node.path_cost + 1)
+                
                 state_child = tuple(map(tuple, child.state))
                 if state_child not in explored and state_child not in frontier_set:
                     frontier.append(child)
