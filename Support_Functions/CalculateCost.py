@@ -1,11 +1,7 @@
-goal = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 0]
-]
+from Support_Functions.SupportFunctions import goal
 
 # số ô sai, khác nhau
-def differrent_cost(state):
+def difference_cost(state):
     cost=0
     for i in range(3):
         for j in range(3):

@@ -2,7 +2,7 @@ import heapq
 from Support_Functions.CheckSolve import check_solve
 from Support_Functions.Node import *
 from Support_Functions.SupportFunctions import *
-from Support_Functions.CalculateCost import differrent_cost
+from Support_Functions.CalculateCost import difference_cost
 
 # Uniform Cost Search 
 # cost=số ô sai
@@ -10,7 +10,7 @@ def UCS(start, goal):
     if not check_solve(start):
         return "failure", "N/A"
     
-    node = Node(state=start)
+    node = Node(state=start, path_cost=difference_cost(start))
     if check_goal(node.state, goal):
         return solution(node), node.path_cost
     
@@ -38,7 +38,7 @@ def UCS(start, goal):
             child = Node(state=new_state, 
                          parent=node, 
                          action=action, 
-                         path_cost=node.path_cost + differrent_cost(new_state))
+                         path_cost=node.path_cost + difference_cost(new_state))
             
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:              

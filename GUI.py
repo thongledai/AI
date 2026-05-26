@@ -6,6 +6,7 @@ from Algorithms_8Puzzle.BFS_8Puzzle import BFS
 from Algorithms_8Puzzle.DFS_8Puzzle import DFS
 from Algorithms_8Puzzle.IDF_8Puzzle import IDS
 from Algorithms_8Puzzle.UCS_8Puzzle import UCS
+from Algorithms_8Puzzle.GS_8Puzzle  import GS
 
 class PuzzleGUI:
     def __init__(self, root):
@@ -37,7 +38,7 @@ class PuzzleGUI:
         lbl_algo = tk.Label(top_frame, text="Chọn thuật toán:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
         lbl_algo.pack(side=tk.LEFT, padx=5)
 
-        self.algo_box = ttk.Combobox(top_frame, values=["Bread First Search", "Depth First Search", "Iterative Deepening Search", "Uniform Cost Search"], state="readonly", width=22)
+        self.algo_box = ttk.Combobox(top_frame, values=["Bread First Search", "Depth First Search", "Iterative Deepening Search", "Uniform Cost Search", "Greedy Search"], state="readonly", width=22)
         self.algo_box.current(0)
         self.algo_box.pack(side=tk.LEFT, padx=10)
 
@@ -171,6 +172,8 @@ class PuzzleGUI:
                 result = IDS(current_input, goal)
             elif algo == "Uniform Cost Search":
                 result = UCS(current_input, goal)
+            elif algo == "Greedy Search":
+                result = GS(current_input, goal)
         except Exception as e:
             messagebox.showerror(
                 "Lỗi Cấu Trúc File",
