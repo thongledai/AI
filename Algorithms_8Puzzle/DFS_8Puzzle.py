@@ -1,4 +1,3 @@
-import random
 from collections import deque
 from Support_Functions.SupportFunctions import check_goal
 from Support_Functions.Node import Node
@@ -13,7 +12,7 @@ def DFS(start, goal):
     
     node = Node(state=start)
     if check_goal(node.state, goal):
-        return solution(node), node.path_cost
+        return get_path(node), node.path_cost
     
     # frontier dùng LIFO
     frontier = deque([node])
@@ -41,7 +40,7 @@ def DFS(start, goal):
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:               
                 if check_goal(child.state, goal):
-                    return solution(child), child.path_cost
+                    return get_path(child), child.path_cost
                 elif child.path_cost >= 50: # giới hạn độ sâu tối đa là 40
                     return "failure", "N/A"
                 else:

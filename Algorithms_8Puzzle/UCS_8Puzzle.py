@@ -12,20 +12,20 @@ def UCS(start, goal):
     
     node = Node(state=start, path_cost=difference_cost(start))
     if check_goal(node.state, goal):
-        return solution(node), node.path_cost
+        return get_path(node), node.path_cost
     
     # frontier dùng hàng đợi ưu tiên
     frontier = []
-    heapq.heappush(frontier, (node.path_cost, node))
+    heapq.heappush(frontier, node)
     frontier_set = set()
     frontier_set.add(tuple(map(tuple, node.state)))
     # các node.state đã xét
     explored = set()
     
     while frontier:
-        node = heapq.heappop(frontier)[1]
+        node = heapq.heappop(frontier)
         if check_goal(node.state, goal):
-            return solution(node), node.path_cost
+            return get_path(node), node.path_cost
         
         state_parent = tuple(map(tuple, node.state))
         explored.add(state_parent)
@@ -42,7 +42,7 @@ def UCS(start, goal):
             
             state_child = tuple(map(tuple, child.state))
             if state_child not in explored and state_child not in frontier_set:              
-                heapq.heappush(frontier, (child.path_cost, child))
+                heapq.heappush(frontier, child)
                 frontier_set.add(state_child)
 
     return "failure", "N/A"

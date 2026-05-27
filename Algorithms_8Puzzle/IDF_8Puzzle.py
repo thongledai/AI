@@ -30,7 +30,7 @@ def DLS(start, goal, limit):
     while frontier:
         node = frontier.pop()
         if check_goal(node.state, goal):
-            return solution(node), node.path_cost
+            return get_path(node), node.path_cost
 
         state_parent = tuple(map(tuple, node.state))
         frontier_set.discard(state_parent)

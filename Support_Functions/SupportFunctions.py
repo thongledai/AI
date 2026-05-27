@@ -39,7 +39,7 @@ def child_state(state, action):
     return new_state
 
 # Lấy đường đi từ star đến goal
-def solution(node):
+def get_path(node):
     path = []
     n = node
     while n.parent:
