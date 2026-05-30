@@ -41,7 +41,7 @@ def DFS(start, goal):
             if state_child not in explored and state_child not in frontier_set:               
                 if check_goal(child.state, goal):
                     return get_path(child), child.path_cost
-                elif child.path_cost >= 50: # giới hạn độ sâu tối đa là 40
+                elif child.path_cost >= 50: # giới hạn độ sâu tối đa là 50
                     return "failure", "N/A"
                 else:
                     frontier.append(child)

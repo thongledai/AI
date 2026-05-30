@@ -8,6 +8,8 @@ from Algorithms_8Puzzle.IDF_8Puzzle     import IDS
 from Algorithms_8Puzzle.UCS_8Puzzle     import UCS
 from Algorithms_8Puzzle.GS_8Puzzle      import GS
 from Algorithms_8Puzzle.AStar_8Puzzle   import AStar
+from Algorithms_8Puzzle.IDAStar_8Puzzle import IDAStar
+
 class PuzzleGUI:
     def __init__(self, root):
         self.root = root
@@ -43,7 +45,9 @@ class PuzzleGUI:
                                                         "Iterative Deepening Search", 
                                                         "Uniform Cost Search", 
                                                         "Greedy Search",
-                                                        "A*"], state="readonly", width=22)
+                                                        "A*",
+                                                        "IDA*"], 
+                                                        state="readonly", width=22)
         self.algo_box.current(0)
         self.algo_box.pack(side=tk.LEFT, padx=10)
 
@@ -181,6 +185,8 @@ class PuzzleGUI:
                 result = GS(current_input, goal)
             elif algo == "A*":
                 result = AStar(current_input, goal)
+            elif algo == "IDA*":
+                result = IDAStar(current_input, goal)
         except Exception as e:
             messagebox.showerror(
                 "Lỗi Cấu Trúc File",
