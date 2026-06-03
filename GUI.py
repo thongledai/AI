@@ -2,14 +2,19 @@ import tkinter as tk
 import copy 
 from tkinter import ttk, messagebox
 from Support_Functions.SupportFunctions import *
-from Algorithms_8Puzzle.BFS_8Puzzle     import BFS
-from Algorithms_8Puzzle.DFS_8Puzzle     import DFS
-from Algorithms_8Puzzle.IDF_8Puzzle     import IDS
-from Algorithms_8Puzzle.UCS_8Puzzle     import UCS
-from Algorithms_8Puzzle.GS_8Puzzle      import GS
-from Algorithms_8Puzzle.AStar_8Puzzle   import AStar
-from Algorithms_8Puzzle.IDAStar_8Puzzle import IDAStar
-from Algorithms_8Puzzle.SHC_8Puzzle     import SHC
+from Algorithms_8Puzzle.UniformedSearch.BreadthFirstSearch                  import BFS
+from Algorithms_8Puzzle.UniformedSearch.DepthFirstSearch                    import DFS
+from Algorithms_8Puzzle.UniformedSearch.IterativeDeepeningSearch            import IDS
+from Algorithms_8Puzzle.UniformedSearch.UniformCostSearch                   import UCS
+from Algorithms_8Puzzle.HeuristicSearch.GreedySearch                        import GS
+from Algorithms_8Puzzle.HeuristicSearch.AStar                               import AStar
+from Algorithms_8Puzzle.HeuristicSearch.IterativeDeepeningAStar             import IDAStar
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.SimpleHillClimbing         import SHC as SimpleHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.SteepestAscentHillClimbing import SAHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.StochasticHillClimbing     import SHC as StochasticHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.RandomRestartHillClimbing  import RRHC
+from Algorithms_8Puzzle.LocalSearch.LocalBeamSearch                         import LBS
+
 class PuzzleGUI:
     def __init__(self, root):
         self.root = root
@@ -40,15 +45,30 @@ class PuzzleGUI:
         lbl_algo = tk.Label(top_frame, text="Chọn thuật toán:", font=('Arial', 13, 'bold'), bg='#f4f4f4', fg='#333333')
         lbl_algo.pack(side=tk.LEFT, padx=5)
 
-        self.algo_box = ttk.Combobox(top_frame, values=["Bread First Search", 
-                                                        "Depth First Search", 
-                                                        "Iterative Deepening Search", 
-                                                        "Uniform Cost Search", 
-                                                        "Greedy Search",
-                                                        "A*",
-                                                        "IDA*",
-                                                        "Simple Hill Climbing"], 
-                                                        state="readonly", width=22)
+        algorithms = [
+            "Bread First Search",
+            "Depth First Search",
+            "Iterative Deepening Search",
+            "Uniform Cost Search",
+            "Greedy Search",
+            "A*",
+            "IDA*",
+            "Simple Hill Climbing",
+            "Steepest Ascent Hill Climbing",
+            "Stochastic Hill Climbing",
+            "Random Restart Hill Climbing",
+            "Local Beam Search"
+        ]
+
+        max_width = max(len(x) for x in algorithms)
+
+        self.algo_box = ttk.Combobox(
+            top_frame,
+            values=algorithms,
+            state="readonly",
+            width=max_width
+        )
+        self.algo_box.configure(height=15)
         self.algo_box.current(0)
         self.algo_box.pack(side=tk.LEFT, padx=10)
 
@@ -189,7 +209,15 @@ class PuzzleGUI:
             elif algo == "IDA*":
                 result = IDAStar(current_input, goal)
             elif algo == "Simple Hill Climbing":
-                result = SHC(current_input, goal)
+                result = SimpleHC(current_input, goal)
+            elif algo == "Steepest Ascent Hill Climbing":
+                result = SAHC(current_input, goal)
+            elif algo == "Stochastic Hill Climbing":
+                result = StochasticHC(current_input, goal)
+            elif algo == "Random Restart Hill Climbing":
+                result = RRHC(current_input, goal)
+            elif algo == "Local Beam Search":
+                result = LBS(current_input, goal)
         except Exception as e:
             messagebox.showerror(
                 "Lỗi Cấu Trúc File",

@@ -19,7 +19,7 @@ class Node:
         return self.f < other.f
     
 
-# IDA*
+# Iterative Deepening A*
 # f(n)=g(n)+h(n)
 # g(n): manhattan, h(n): difference
 

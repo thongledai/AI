@@ -3,7 +3,7 @@ from Support_Functions.SupportFunctions import *
 from Support_Functions.CheckSolve import check_solve
 from Support_Functions.Node import Node
 
-# Bread First Search
+# Breadth First Search
 def BFS(start, goal):
     if not check_solve(start):
         return "failure", "N/A"
