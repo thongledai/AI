@@ -2,13 +2,13 @@ import tkinter as tk
 import copy 
 from tkinter import ttk, messagebox
 from Support_Functions.SupportFunctions import *
-from Algorithms_8Puzzle.UniformedSearch.BreadthFirstSearch                  import BFS
-from Algorithms_8Puzzle.UniformedSearch.DepthFirstSearch                    import DFS
-from Algorithms_8Puzzle.UniformedSearch.IterativeDeepeningSearch            import IDS
-from Algorithms_8Puzzle.UniformedSearch.UniformCostSearch                   import UCS
-from Algorithms_8Puzzle.HeuristicSearch.GreedySearch                        import GS
-from Algorithms_8Puzzle.HeuristicSearch.AStar                               import AStar
-from Algorithms_8Puzzle.HeuristicSearch.IterativeDeepeningAStar             import IDAStar
+from Algorithms_8Puzzle.UninformedSearch.BreadthFirstSearch                  import BFS
+from Algorithms_8Puzzle.UninformedSearch.DepthFirstSearch                    import DFS
+from Algorithms_8Puzzle.UninformedSearch.IterativeDeepeningSearch            import IDS
+from Algorithms_8Puzzle.UninformedSearch.UniformCostSearch                   import UCS
+from Algorithms_8Puzzle.InformedSearch.GreedySearch                        import GS
+from Algorithms_8Puzzle.InformedSearch.AStar                               import AStar
+from Algorithms_8Puzzle.InformedSearch.IterativeDeepeningAStar             import IDAStar
 from Algorithms_8Puzzle.LocalSearch.HillClimbing.SimpleHillClimbing         import SHC as SimpleHC
 from Algorithms_8Puzzle.LocalSearch.HillClimbing.SteepestAscentHillClimbing import SAHC
 from Algorithms_8Puzzle.LocalSearch.HillClimbing.StochasticHillClimbing     import SHC as StochasticHC
