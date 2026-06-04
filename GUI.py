@@ -228,7 +228,7 @@ class PuzzleGUI:
             return
 
 
-        # Xử lý kết quả trả về
+        # Xử lý kết quả
         if result is None:
             self.update_info_fields("Failure", "N/A")
             return
