@@ -6,15 +6,15 @@ from Algorithms_8Puzzle.UninformedSearch.BreadthFirstSearch                  imp
 from Algorithms_8Puzzle.UninformedSearch.DepthFirstSearch                    import DFS
 from Algorithms_8Puzzle.UninformedSearch.IterativeDeepeningSearch            import IDS
 from Algorithms_8Puzzle.UninformedSearch.UniformCostSearch                   import UCS
-from Algorithms_8Puzzle.InformedSearch.GreedySearch                        import GS
-from Algorithms_8Puzzle.InformedSearch.AStar                               import AStar
-from Algorithms_8Puzzle.InformedSearch.IterativeDeepeningAStar             import IDAStar
-from Algorithms_8Puzzle.LocalSearch.HillClimbing.SimpleHillClimbing         import SHC as SimpleHC
-from Algorithms_8Puzzle.LocalSearch.HillClimbing.SteepestAscentHillClimbing import SAHC
-from Algorithms_8Puzzle.LocalSearch.HillClimbing.StochasticHillClimbing     import SHC as StochasticHC
-from Algorithms_8Puzzle.LocalSearch.HillClimbing.RandomRestartHillClimbing  import RRHC
-from Algorithms_8Puzzle.LocalSearch.LocalBeamSearch                         import LBS
-
+from Algorithms_8Puzzle.InformedSearch.GreedySearch                          import GS
+from Algorithms_8Puzzle.InformedSearch.AStar                                 import AStar
+from Algorithms_8Puzzle.InformedSearch.IterativeDeepeningAStar               import IDAStar
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.SimpleHillClimbing          import SHC as SimpleHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.SteepestAscentHillClimbing  import SAHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.StochasticHillClimbing      import SHC as StochasticHC
+from Algorithms_8Puzzle.LocalSearch.HillClimbing.RandomRestartHillClimbing   import RRHC
+from Algorithms_8Puzzle.LocalSearch.LocalBeamSearch                          import LBS
+from Algorithms_8Puzzle.LocalSearch.SimulatedAnnealing                       import SA
 class PuzzleGUI:
     def __init__(self, root):
         self.root = root
@@ -57,7 +57,8 @@ class PuzzleGUI:
             "Steepest Ascent Hill Climbing",
             "Stochastic Hill Climbing",
             "Random Restart Hill Climbing",
-            "Local Beam Search"
+            "Local Beam Search",
+            "Simulated Annealing"
         ]
 
         max_width = max(len(x) for x in algorithms)
@@ -218,6 +219,8 @@ class PuzzleGUI:
                 result = RRHC(current_input, goal)
             elif algo == "Local Beam Search":
                 result = LBS(current_input, goal)
+            elif algo == "Simulated Annealing":
+                result = SA(current_input, goal)
         except Exception as e:
             messagebox.showerror(
                 "Lỗi Cấu Trúc File",
