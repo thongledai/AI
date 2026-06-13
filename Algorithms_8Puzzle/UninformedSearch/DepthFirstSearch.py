@@ -42,7 +42,7 @@ def DFS(start, goal):
                 if check_goal(child.state, goal):
                     return get_path(child), child.path_cost
                 elif child.path_cost >= 50: # giới hạn độ sâu tối đa là 50
-                    return "failure", "N/A"
+                    raise RecursionError("maximum recursion depth exceeded")
                 else:
                     frontier.append(child)
                     frontier_set.add(state_child)

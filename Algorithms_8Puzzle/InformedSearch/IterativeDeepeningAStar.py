@@ -32,8 +32,7 @@ def IDAStar(start, goal):
         result = DLS(start, goal, depth)
         if result != "cutoff" and result != "failure":
             return result
-        
-    return "failure", "N/A"
+    raise RecursionError("maximum recursion depth exceeded")
 
 
 def DLS(start, goal, limit):
