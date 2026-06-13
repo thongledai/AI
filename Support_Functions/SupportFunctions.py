@@ -1,5 +1,7 @@
 import random
 
+from Support_Functions.CheckSolve import check_solve
+
 # Lấy vị trí ô trống
 def get_empty(state):
     for i in range(3):
@@ -65,5 +67,16 @@ goal = [
     [7, 8, 0]
 ]
 
-def check_goal(state, goal):
-    return state == goal
+# 10 Trạng thái đích cho BSS
+BSS_GOALS = [
+    [[1, 2, 3], [4, 5, 6], [7, 8, 0]],
+    [[1, 2, 3], [8, 0, 4], [7, 6, 5]],
+    [[1, 4, 7], [2, 5, 8], [3, 6, 0]],
+    [[0, 8, 7], [6, 5, 4], [3, 2, 1]],
+    [[1, 8, 7], [2, 0, 6], [3, 4, 5]],
+    [[7, 8, 0], [4, 5, 6], [1, 2, 3]],
+    [[1, 6, 7], [2, 5, 8], [3, 4, 0]],
+    [[8, 7, 6], [5, 4, 3], [2, 1, 0]],
+    [[8, 7, 6], [3, 4, 5], [2, 1, 0]],
+    [[8, 3, 2], [7, 4, 1], [6, 5, 0]]
+]
