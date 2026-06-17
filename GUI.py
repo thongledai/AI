@@ -18,6 +18,10 @@ from Algorithms_8Puzzle.LocalSearch.SimulatedAnnealing                       imp
 from Algorithms_8Puzzle.Stochastic.AndOrGraphSearch                          import AOGS
 from Algorithms_8Puzzle.PartiallyObservable.BeliefStateSearch                import BSS         as PBSS, INITIAL_BELIEF as PBSS_BELIEF
 from Algorithms_8Puzzle.Unobservable.BeliefStateSearch                       import BSS         as UBSS, INITIAL_BELIEF as UBSS_BELIEF
+from Algorithms_8Puzzle.ConstraintSatisfactionProblems.BacktrackingSearch    import BS
+from Algorithms_8Puzzle.ConstraintSatisfactionProblems.AC3                   import AC3
+from Algorithms_8Puzzle.ConstraintSatisfactionProblems.ForwardChecking       import FC
+from Algorithms_8Puzzle.ConstraintSatisfactionProblems.MinConflictAlgorithm  import MC
 
 
 class PuzzleGUI:
@@ -35,6 +39,10 @@ class PuzzleGUI:
         self.bss_states_1 = []
         self.bss_states_2 = []
         self.bss_index = 0
+
+        # CSP: danh sách từng bước (không dùng path/cost)
+        self.csp_states = []
+        self.csp_index = 0
 
         self.setup_styles()
         self.create_widgets()
@@ -69,6 +77,10 @@ class PuzzleGUI:
             "And-Or Graph Search",
             "Partially Observable BSS",
             "Unobservable BSS",
+            "Backtracking Search",
+            "AC-3",
+            "Forward Checking",
+            "Min Conflict",
         ]
 
         max_width = max(len(x) for x in algorithms)
@@ -182,12 +194,21 @@ class PuzzleGUI:
         algo = self.algo_box.get()
         return algo in ("Partially Observable BSS", "Unobservable BSS")
 
+    def _is_csp_mode(self):
+        algo = self.algo_box.get()
+        return algo in ("Backtracking Search", "AC-3",
+                        "Forward Checking", "Min Conflict")
+
     def _on_algo_change(self, event=None):
         if self._is_bss_mode():
             self.matrix_container.place_forget()
             self.bss_frame.place(x=20, y=100, width=590, height=380)
             belief = PBSS_BELIEF if self.algo_box.get() == "Partially Observable BSS" else UBSS_BELIEF
             self._update_bss_matrices(belief[0], belief[1])
+        elif self._is_csp_mode():
+            self.bss_frame.place_forget()
+            self.matrix_container.place(x=150, y=100, width=360, height=360)
+            self._clear_csp_matrix()
         else:
             self.bss_frame.place_forget()
             self.matrix_container.place(x=150, y=100, width=360, height=360)
@@ -261,6 +282,13 @@ class PuzzleGUI:
             self.bss_index = 0
             return
 
+        if self._is_csp_mode():
+            self._clear_csp_matrix()
+            self.update_info_fields("", "")
+            self.csp_states = []
+            self.csp_index = 0
+            return
+
         random_state = random_start()
         self.current_states_list = [random_state]
         self.current_index = 0
@@ -275,6 +303,10 @@ class PuzzleGUI:
 
         if self._is_bss_mode():
             self._execute_bss(algo)
+            return
+
+        if self._is_csp_mode():
+            self._execute_csp(algo)
             return
 
         current_input = self.get_state_from_gui()
@@ -391,6 +423,63 @@ class PuzzleGUI:
         path_str = " - ".join(path) if path else "Goal!"
         self.update_info_fields(path_str, str(cost))
 
+    def _clear_csp_matrix(self):
+        #Xóa toàn bộ ma trận về trạng thái trống (None) cho CSP mode
+        for i in range(3):
+            for j in range(3):
+                self.matrix_entries[i][j].config(state=tk.NORMAL)
+                self.matrix_entries[i][j].delete(0, tk.END)
+                self.matrix_entries[i][j].config(bg='#e0e0e0')
+
+    def _display_csp_state(self, state):
+        #Hiển thị một snapshot CSP lên ma trận (None hiển thị thành ô xám trống).
+        for i in range(3):
+            for j in range(3):
+                val = state[i][j]
+                self.matrix_entries[i][j].config(state=tk.NORMAL)
+                self.matrix_entries[i][j].delete(0, tk.END)
+                if val is None:
+                    self.matrix_entries[i][j].insert(0, "")
+                    self.matrix_entries[i][j].config(bg='#e0e0e0')
+                else:
+                    self.matrix_entries[i][j].insert(0, str(val))
+                    self.matrix_entries[i][j].config(bg='white')
+
+    def _execute_csp(self, algo):
+        #Thực thi thuật toán CSP và lưu danh sách các bước trung gian.
+        try:
+            if algo == "Backtracking Search":
+                goal_state, states = BS()
+            elif algo == "AC-3":
+                goal_state, states = AC3()
+            elif algo == "Forward Checking":
+                goal_state, states = FC()
+            elif algo == "Min Conflict":
+                goal_state, states = MC()
+            else:
+                messagebox.showinfo("Chưa hỗ trợ", f"Thuật toán '{algo}' chưa được cài đặt.")
+                self.update_info_fields("", "")
+                return
+        except Exception as e:
+            messagebox.showerror(
+                "Lỗi Cấu Trúc File",
+                f"Không thể chạy thuật toán:\n\n{type(e).__name__}: {str(e)}"
+            )
+            self.update_info_fields("Error", "")
+            print(type(e).__name__, ":", e)
+            return
+
+        if goal_state is None:
+            self.update_info_fields("No Solution", "")
+            return
+
+        self.csp_states = states
+        self.csp_index = 0
+        self._display_csp_state(self.csp_states[self.csp_index])
+        # Hiển thị cost là số lượng states
+        self.update_info_fields("", str(len(states)))
+
+
     def handle_next(self):
         if self._is_bss_mode():
             if self.bss_states_1 and self.bss_index < len(self.bss_states_1) - 1:
@@ -401,6 +490,12 @@ class PuzzleGUI:
                         " - ".join(self.path_actions),
                         f" {self.bss_index} / {len(self.path_actions)}"
                     )
+            return
+
+        if self._is_csp_mode():
+            if self.csp_states and self.csp_index < len(self.csp_states) - 1:
+                self.csp_index += 1
+                self._display_csp_state(self.csp_states[self.csp_index])
             return
 
         if not self.current_states_list: return
@@ -425,6 +520,12 @@ class PuzzleGUI:
                     )
             return
 
+        if self._is_csp_mode():
+            if self.csp_states and self.csp_index > 0:
+                self.csp_index -= 1
+                self._display_csp_state(self.csp_states[self.csp_index])
+            return
+
         if not self.current_states_list: return
         if self.current_index > 0:
             self.current_index -= 1
@@ -442,6 +543,8 @@ class PuzzleGUI:
         self.bss_states_1 = []
         self.bss_states_2 = []
         self.bss_index = 0
+        self.csp_states = []
+        self.csp_index = 0
 
         for i in range(3):
             for j in range(3):
@@ -454,3 +557,5 @@ class PuzzleGUI:
         if self._is_bss_mode():
             belief = PBSS_BELIEF if self.algo_box.get() == "Partially Observable BSS" else UBSS_BELIEF
             self._update_bss_matrices(belief[0], belief[1])
+        elif self._is_csp_mode():
+            self._clear_csp_matrix()
