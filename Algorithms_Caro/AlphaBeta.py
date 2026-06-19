@@ -1,3 +1,5 @@
+from Utils import is_terminal, utility, actions, result
+
 def alpha_beta_minimax(state, depth, alpha, beta, maximizing_player):
    if is_terminal(state) or depth == 0:
        return utility(state)
@@ -7,7 +9,7 @@ def alpha_beta_minimax(state, depth, alpha, beta, maximizing_player):
            value = max(value, alpha_beta_minimax(result(state, action), depth-1, alpha, beta, False))
            alpha = max(alpha, value)
            if beta <= alpha:
-               break # Beta cut-off
+               break
        return value
    else:
        value = float('inf')
@@ -15,5 +17,5 @@ def alpha_beta_minimax(state, depth, alpha, beta, maximizing_player):
            value = min(value, alpha_beta_minimax(result(state, action), depth-1, alpha, beta, True))
            beta = min(beta, value)
            if beta <= alpha:
-               break # Alpha cut-off
+               break
        return value

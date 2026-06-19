@@ -1,3 +1,5 @@
+from Utils import is_terminal, utility, actions, result
+
 def expectima(state, depth, maximizing_player):
    if is_terminal(state) or depth == 0:
        return utility(state)
