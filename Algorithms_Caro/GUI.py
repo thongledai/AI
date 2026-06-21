@@ -183,6 +183,7 @@ class CaroGUI:
             if score > best_score:
                 best_score = score
                 best_move = action
+                
 
         return best_move
 
